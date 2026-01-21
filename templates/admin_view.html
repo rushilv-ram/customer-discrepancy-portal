@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Record {{ rows[0]['Reference No'] if rows else 'Record' }} - RANE MADRAS LIMITED Discrepancy Portal</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+  <link rel="icon" href="{{ url_for('static', filename='favicon.svg') }}" type="image/svg+xml"> 
+  <style>.meta{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}.img-row{display:flex;gap:12px;margin-top:12px}img.preview{width:180px;height:120px;object-fit:cover;border-radius:6px;border:1px solid rgba(0,0,0,0.06)}</style>
+</head>
+<body>
+<header class="site-header">
+    <div class="container header-row header-bar">
+        <div class="header-left">
+            <a class="btn secondary" href="{{ url_for('home') }}">Home</a>
+        </div>
+        <div class="header-center">
+            <div class="brand">
+                <img src="{{ url_for('static', filename='logo.svg') }}" alt="RANE MADRAS LIMITED" class="brand-logo" onerror="this.style.display='none'">
+                <div class="brand-text">
+                    <h1>RANE MADRAS LIMITED</h1>
+                    <p>Record View</p>
+                </div>
+            </div>
+        </div>
+        <div class="header-right">
+            <div class="sr-badge">SR No: {{ rows[0]['SR No'] if rows else '' }}</div>
+            <a class="btn" href="{{ url_for('logout') }}">Logout</a>
+        </div>
+    </div>
+</header> 
+<div class="container">
+  <h2>{{ rows[0]['Reference No'] if rows and rows[0]['Reference No'] else 'Record' }}</h2>
+
+  <div style="margin-bottom:8px"><strong>SR No:</strong> {{ rows[0]['SR No'] if rows else '' }} | <strong>Customer:</strong> {{ rows[0]['Customer Name'] if rows else (rows[0]['Company Name'] if rows else '') }}</div>
+
+  <h3>Invoices ({{ rows|length }})</h3>
+  {% for row in rows %}
+    <div class="meta" style="grid-template-columns:1fr 1fr; gap:10px; margin-bottom:10px; padding:10px; border-radius:6px; border:1px solid #eef4ff; background:#fff">
+      <div><strong>Invoice No:</strong> {{ row['Invoice No'] }}</div>
+      <div><strong>Invoice Date:</strong> {{ row['Invoice Date'] }}</div>
+      <div><strong>Warehouse:</strong> {{ row['Warehouse'] }} ({{ row['Warehouse Code'] }})</div>
+      <div><strong>Part No:</strong> {{ row['Part No'] }}</div>
+      <div><strong>Rate:</strong> {{ row['Rate'] }}</div>
+      <div><strong>Billed Qty:</strong> {{ row['Billed Qty'] }}</div>
+      <div><strong>Received Qty:</strong> {{ row['Received Qty'] }}</div>
+      <div><strong>Short:</strong> {{ row['Short'] }}</div>
+      <div><strong>Excess:</strong> {{ row['Excess'] }}</div>
+      <div><strong>Mismatch Parts:</strong> {{ row['Mismatch Parts'] }}</div>
+      <div><strong>Damage:</strong> {{ row['Damage'] }}</div>
+      <div><strong>MRP Sticker Required:</strong> {{ row['MRP Sticker Required'] }}</div>
+      <div><strong>Submitted At:</strong> {{ row['Submitted At'] }}</div>
+
+      <div style="grid-column:1/-1; margin-top:6px">
+        <div class="img-row">
+          {% if row['Invoice Image'] %}
+            <div>
+              <strong>Invoice</strong><br>
+              <a href="{{ url_for('uploaded_file', folder='invoice', filename=row['Invoice Image']) }}">
+                <img class="preview" src="{{ url_for('uploaded_file', folder='invoice', filename=row['Invoice Image']) }}" alt="Invoice">
+              </a>
+              <div class="file-meta"><a href="{{ url_for('uploaded_file', folder='invoice', filename=row['Invoice Image']) }}">{{ row['Invoice Image'] }}</a></div>
+            </div>
+          {% endif %}
+        </div>
+      </div>
+
+    </div>
+  {% endfor %}
+
+  <div style="margin-top:10px">
+    <form method="POST" action="{{ url_for('admin_update', sr_no=rows[0]['SR No']|int) }}">
+      <div style="display:flex;gap:12px;align-items:center;margin-top:10px;flex-wrap:wrap">
+        <label><strong>Status</strong></label>
+        <select name="status"> 
+          <option value="" {% if not rows[0]['Status'] %}selected{% endif %}>Open</option>
+          <option value="In Process" {% if rows[0]['Status']=='In Process' %}selected{% endif %}>In Process</option>
+          <option value="Action Taken" {% if rows[0]['Status']=='Action Taken' %}selected{% endif %}>Action Taken</option>
+          <option value="Action To Be Taken" {% if rows[0]['Status']=='Action To Be Taken' %}selected{% endif %}>Action To Be Taken</option>
+        </select>
+
+        <label style="margin-left:8px"><strong>Admin Notes</strong></label>
+        <textarea name="notes" style="min-width:300px;min-height:80px">{{ rows[0]['Admin Notes'] }}</textarea>
+
+        <button class="btn" type="submit">Save</button>
+        <a class="btn secondary" href="{{ url_for('admin') }}">Back to List</a> 
+      </div>
+    </form>
+  </div>
+
+  {% if rows[0]['Activity Log'] %}
+  <div style="margin-top:18px">
+    <h3>Activity Log</h3>
+    <div class="activity-list">
+      {% for entry in rows[0]['Activity Log'].split('||') %}
+        <div class="activity-item">{{ entry }}</div>
+      {% endfor %} 
+    </div>
+  </div>
+  {% endif %}
+
+
+
+</div>
+</body>
+</html>

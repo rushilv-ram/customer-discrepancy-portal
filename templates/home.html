@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Welcome - RANE MADRAS LIMITED Discrepancy Portal</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+  <link rel="icon" href="{{ url_for('static', filename='favicon.svg') }}" type="image/svg+xml">
+</head>
+<body>
+<header class="site-header">
+    <div class="container header-row header-bar">
+        <div class="header-left">
+        </div>
+        <div class="header-center">
+            <div class="brand">
+                <img src="{{ url_for('static', filename='logo.svg') }}" alt="RANE MADRAS LIMITED" class="brand-logo" onerror="this.style.display='none'">
+                <div class="brand-text">
+                    <h1>RANE MADRAS LIMITED</h1>
+                    <p>Discrepancy Portal</p>
+                </div>
+            </div>
+        </div>
+        <div class="header-right">
+        </div>
+    </div>
+</header>
+
+<div class="container">
+  <section class="hero">
+    <div class="hero-left">
+      <h2>Welcome to the Discrepancy Portal</h2>
+      <p class="lead">Quickly report a discrepancy or track your existing submissions. Choose a role to continue.</p>
+      <div class="decorative">
+        <div class="dot"></div>
+        <div class="stripe"></div>
+      </div>
+    </div>
+
+    <div class="hero-right">
+      <div class="role-grid">
+        <div class="role-card">
+          <h3>Customer</h3>
+          <p class="muted">Report an issue or track a submission.</p>
+          <div class="role-actions">
+            <a class="btn" href="{{ url_for('form') }}">Complain</a>
+            <a class="btn secondary" href="{{ url_for('track') }}">Track</a>
+          </div>
+        </div>
+
+        <div class="role-card admin-card">
+          <h3>Admin</h3>
+          <p class="muted">Authorized personnel access.</p>
+          <div class="role-actions">
+            <a class="btn" href="{{ url_for('login') }}">Admin Login</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="features">
+    <div class="feature">
+      <h4>Professional Support</h4>
+      <p class="muted">A streamlined process to ensure quick resolution.</p>
+    </div>
+    <div class="feature">
+      <h4>Secure</h4>
+      <p class="muted">Admin access is protected and activity logged.</p>
+    </div>
+    <div class="feature">
+      <h4>Clear Tracking</h4>
+      <p class="muted">See the current status and activity log for each submission.</p>
+    </div>
+  </section>
+</div>
+</body>
+</html>

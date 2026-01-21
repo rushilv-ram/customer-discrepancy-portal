@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Track Reference - RANE MADRAS LIMITED Discrepancy Portal</title> 
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+  <link rel="icon" href="{{ url_for('static', filename='favicon.svg') }}" type="image/svg+xml">
+  <style>
+    .track-card{max-width:880px;margin:30px auto;padding:22px;border-radius:12px;background:white;border:1px solid #eef7ff}
+    .track-header{display:flex;justify-content:space-between;align-items:center}
+    .status-big{font-size:18px;padding:10px 16px;border-radius:12px;font-weight:800}
+    .track-grid{display:grid;grid-template-columns:1fr 320px;gap:18px;margin-top:14px}
+    .log{background:#fbfdff;padding:12px;border-radius:8px;border:1px solid #eef7ff}
+    .muted{color:#64748b}
+  </style>
+</head>
+<body>
+<header class="site-header">
+    <div class="container header-row header-bar">
+        <div class="header-left">
+            <a class="btn secondary" href="{{ url_for('home') }}">Home</a>
+        </div>
+        <div class="header-center">
+            <div class="brand">
+                <img src="{{ url_for('static', filename='logo.svg') }}" alt="RANE MADRAS LIMITED" class="brand-logo" onerror="this.style.display='none'">
+                <div class="brand-text">
+                    <h1>RANE MADRAS LIMITED</h1>
+                    <p>Track your submission</p>
+                </div>
+            </div>
+        </div>
+        <div class="header-right">
+            <a class="btn" href="{{ url_for('admin') }}">Admin</a>
+        </div>
+    </div>
+</header> 
+
+<div class="container">
+  <div class="track-card">
+    <div class="track-header">
+      <div>
+        <h2>Track by Reference No</h2>
+        <p class="muted">Enter your Reference No to see the current status and activity log.</p>
+      </div>
+      <div>
+        <form method="POST" style="display:flex;gap:8px;align-items:center">
+          <input name="reference" placeholder="RLM-YYYYMMDD-00001" value="{{ ref }}" style="padding:10px;border-radius:8px;border:1px solid #dbe6f3">
+          <button class="btn" type="submit">Lookup</button> 
+        </form>
+      </div>
+    </div>
+
+    {% if result %}
+    <div class="track-grid">
+      <div>
+        <h3>{{ result['Reference No'] }} <small class="muted">(SR {{ result['SR No'] }})</small></h3>
+        <div style="margin-top:6px"><strong>Status:</strong>
+          {% if result['Status'] %}
+            {% if result['Status']=='Action Taken' %}
+              <span class="status-badge status-action-taken">{{ result['Status'] }}</span>
+            {% elif result['Status']=='In Process' %}
+              <span class="status-badge status-in-process">{{ result['Status'] }}</span>
+            {% elif result['Status']=='Action To Be Taken' %}
+              <span class="status-badge status-action-to-be-taken">{{ result['Status'] }}</span> 
+            {% else %}
+              <span class="status-badge">{{ result['Status'] }}</span>
+            {% endif %}
+          {% else %}
+            <span class="status-badge status-open">Open</span> 
+          {% endif %}
+        </div>
+
+        <div style="margin-top:12px">
+          <strong>Summary:</strong>
+          <div class="muted">{{ result['Subject'] or 'No summary provided' }}</div>
+        </div>
+
+        <div style="margin-top:12px">
+          <strong>Details</strong>
+          <div class="muted">Invoice: {{ result['Invoice No'] }} | Date: {{ result['Invoice Date'] }}</div>
+          <div class="muted">Customer: {{ result['Customer Name'] or result['Company Name'] }}</div>
+        </div>
+
+        <div style="margin-top:14px">
+          <strong>Activity Log</strong>
+          <div class="log">
+            {% set entries = (result['Activity Log'] or '').split('||') if result['Activity Log'] else [] %}
+            {% if entries %}
+              {% for e in entries|reverse %}
+                <div style="padding:8px;border-bottom:1px dashed #eef4ff">{{ e }}</div> 
+              {% endfor %}
+            {% else %}
+              <div class="muted">No activity yet.</div>
+            {% endif %}
+          </div>
+        </div>
+
+      </div>
+      <div>
+        <div style="padding:12px;background:#f8fafc;border-radius:8px;border:1px solid #eef4ff">
+          <h4>Quick info</h4>
+          <div><strong>Reference:</strong> {{ result['Reference No'] }}</div>
+          <div><strong>Submitted:</strong> {{ result['Submitted At'] }}</div>
+          <div><strong>Invoice:</strong> {{ result['Invoice No'] }}</div>
+          <div><strong>Status:</strong> {{ result['Status'] or 'Open' }}</div>
+          <div style="margin-top:10px"><a class="btn" href="{{ url_for('admin_view', sr_no=result['SR No']|int) }}">View Details (Admin)</a></div> 
+        </div>
+
+        <div style="margin-top:12px;padding:12px;border-radius:8px;background:#fff;border:1px solid #eef4ff">
+          <h4>Need help?</h4>
+          <div class="muted">Contact RANE MADRAS LIMITED support with your Reference No for updates.</div>
+        </div>
+      </div>
+    </div>
+    {% elif ref %}
+      <div style="margin-top:16px;color:#d03b3b">No record found for '{{ ref }}'. Please check the reference number.</div>
+    {% endif %}
+  </div>
+</div>
+</body>
+</html>

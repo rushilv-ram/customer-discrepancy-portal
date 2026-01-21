@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>RANE MADRAS LIMITED Discrepancy Portal</title> 
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <link rel="icon" href="{{ url_for('static', filename='favicon.svg') }}" type="image/svg+xml">
+    <script>const WAREHOUSE_MAP = {{ warehouse_map | tojson }};</script>
+    <script src="{{ url_for('static', filename='script.js') }}" defer></script>
+</head>
+<body>
+<header class="site-header">
+    <div class="container header-row header-bar">
+        <div class="header-left">
+            <a class="btn secondary" href="{{ url_for('home') }}">Home</a>
+        </div>
+        <div class="header-center">
+            <div class="brand">
+                <img src="{{ url_for('static', filename='logo.svg') }}" alt="RANE MADRAS LIMITED" class="brand-logo" onerror="this.style.display='none'">
+                <div class="brand-text">
+                    <h1>RANE MADRAS LIMITED</h1>
+                    <p>Discrepancy Portal</p>
+                </div>
+            </div>
+        </div>
+        <div class="header-right">
+            {% if sr_no %}<div class="sr-badge">SR No: {{ sr_no }}</div>{% endif %}
+            <a class="btn" href="{{ url_for('admin') }}">Admin</a>
+        </div>
+    </div>
+</header> 
+
+<div class="container">
+    <div class="form-grid">
+        <div class="left-panel">
+            <form method="POST" enctype="multipart/form-data">
+                {% if parts %}
+                <datalist id="parts-list">
+                  {% for p in parts %}
+                    <option value="{{ p }}"></option>
+                  {% endfor %}
+                </datalist>
+                {% endif %}
+                <div class="grid">
+                    <div class="field">
+                        <label>Subject</label>
+                        <input name="subject" placeholder="Short summary">
+                    </div>
+
+                    <!-- Invoice list (multiple invoices supported) -->
+                    <div id="invoice-list-wrap">
+                        <div class="section-title">
+                            <h3>Invoices</h3>
+                            <div class="helper">Add each invoice's details. Use the per-invoice image upload for invoice-specific images.</div>
+                        </div>
+                        <div id="invoice-list">
+                            <div class="invoice-item">
+                                <div class="invoice-row">
+                                    <div class="field">
+                                        <label>Invoice No <small class="required">*</small></label>
+                                        <input name="invoice_no" required placeholder="e.g. 25051234">
+                                    </div>
+                                    <div class="field">
+                                        <label>Invoice Date</label>
+                                        <input type="date" name="invoice_date">
+                                    </div>
+                                    <div class="field">
+                                        <label>Warehouse (Auto)</label>
+                                        <input name="warehouse_auto" value="Unknown" disabled>
+                                    </div>
+                                    <div class="field">
+                                        <label>Warehouse Code (Auto)</label>
+                                        <input name="warehouse_code_auto" value="Unknown" disabled>
+                                    </div>
+                                </div>
+
+                                <div class="invoice-row">
+                                    <div class="field">
+                                        <label>Part No</label>
+                                        <input name="part_no" list="parts-list">
+                                    </div>
+                                    <div class="field">
+                                        <label>Rate</label>
+                                        <input name="rate" type="text">
+                                    </div>
+                                    <div class="field">
+                                        <label>Billed Quantity</label>
+                                        <input name="billed_qty">
+                                    </div>
+                                    <div class="field">
+                                        <label>Received Quantity</label>
+                                        <input name="received_qty">
+                                    </div>
+                                </div>
+
+                                <div class="invoice-row">
+                                    <div class="field">
+                                        <label>Short</label>
+                                        <input name="short">
+                                    </div>
+                                    <div class="field">
+                                        <label>Excess</label>
+                                        <input name="excess">
+                                    </div>
+                                    <div class="field">
+                                        <label>Mismatch Parts</label>
+                                        <input name="mismatch">
+                                    </div>
+                                    <div class="field">
+                                        <label>Damage</label>
+                                        <input name="damage">
+                                    </div>
+                                </div>
+
+                                <div class="invoice-row">
+                                    <div class="field">
+                                        <label>MRP Sticker Required</label>
+                                        <select name="mrp_sticker"><option>Yes</option><option>No</option></select>
+                                    </div>
+                                    <div class="field">
+                                        <label>Invoice Image</label>
+                                        <input type="file" name="invoice_image" accept="image/*">
+                                        <div class="preview">
+                                            <img class="invoice-preview" src="" alt="Invoice preview" />
+                                            <div class="file-meta">No file selected</div>
+                                        </div>
+                                    </div>
+
+                                    <div class="field invoice-controls">
+                                        <button type="button" class="btn secondary remove-invoice">Remove</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="field add-invoice-wrap">
+                            <button type="button" class="btn" id="add-invoice">+ Add Another Invoice</button>
+                        </div>
+
+                        <!-- Template used by JS when adding new invoice items -->
+                        <template id="invoice-template">
+                            <div class="invoice-item">
+                                <div class="invoice-row">
+                                    <div class="field">
+                                        <label>Invoice No <small class="required">*</small></label>
+                                        <input name="invoice_no" required placeholder="e.g. 25051234">
+                                    </div>
+                                    <div class="field">
+                                        <label>Invoice Date</label>
+                                        <input type="date" name="invoice_date">
+                                    </div>
+                                    <div class="field">
+                                        <label>Warehouse (Auto)</label>
+                                        <input name="warehouse_auto" value="Unknown" disabled>
+                                    </div>
+                                    <div class="field">
+                                        <label>Warehouse Code (Auto)</label>
+                                        <input name="warehouse_code_auto" value="Unknown" disabled>
+                                    </div>
+                                </div>
+
+                                <div class="invoice-row">
+                                    <div class="field">
+                                        <label>Part No</label>
+                                        <input name="part_no" list="parts-list">
+                                    </div>
+                                    <div class="field">
+                                        <label>Rate</label>
+                                        <input name="rate" type="text">
+                                    </div>
+                                    <div class="field">
+                                        <label>Billed Quantity</label>
+                                        <input name="billed_qty">
+                                    </div>
+                                    <div class="field">
+                                        <label>Received Quantity</label>
+                                        <input name="received_qty">
+                                    </div>
+                                </div>
+
+                                <div class="invoice-row">
+                                    <div class="field">
+                                        <label>Short</label>
+                                        <input name="short">
+                                    </div>
+                                    <div class="field">
+                                        <label>Excess</label>
+                                        <input name="excess">
+                                    </div>
+                                    <div class="field">
+                                        <label>Mismatch Parts</label>
+                                        <input name="mismatch">
+                                    </div>
+                                    <div class="field">
+                                        <label>Damage</label>
+                                        <input name="damage">
+                                    </div>
+                                </div>
+
+                                <div class="invoice-row">
+                                    <div class="field">
+                                        <label>MRP Sticker Required</label>
+                                        <select name="mrp_sticker"><option>Yes</option><option>No</option></select>
+                                    </div>
+                                    <div class="field">
+                                        <label>Invoice Image</label>
+                                        <input type="file" name="invoice_image" accept="image/*">
+                                        <div class="preview">
+                                            <img class="invoice-preview" src="" alt="Invoice preview" />
+                                            <div class="file-meta">No file selected</div>
+                                        </div>
+                                    </div>
+
+                                    <div class="field invoice-controls">
+                                        <button type="button" class="btn secondary remove-invoice">Remove</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+
+                    <div class="field">
+                        <label>Customer Name</label>
+                        <input name="customer_name" placeholder="Customer or Consignee">
+                    </div>
+
+                    <div class="field">
+                        <label>City</label>
+                        <input name="city">
+                    </div>
+
+                    <div class="field">
+                        <label>State</label>
+                        <input name="state">
+                    </div>
+
+                    <div class="field">
+                        <label>Transporter Name</label>
+                        <input name="transporter">
+                    </div>
+
+                    <div class="field">
+                        <label>LR Number</label>
+                        <input name="lr_no">
+                    </div>
+
+                    <div class="field">
+                        <label>LR Date</label>
+                        <input type="date" name="lr_date">
+                    </div>
+                </div>
+
+        </div>
+        <div class="right-panel">
+            <div class="section-title">
+                <h3>Supporting Images</h3>
+                <div class="helper">Global supporting images (optional). Use per-invoice images inside each invoice card when needed.</div>
+            </div>
+            <div class="upload-box">
+
+                <div class="upload-item">
+                    <label>Invoice Image</label>
+                    <input type="file" name="invoice_image" accept="image/*">
+                    <div class="preview">
+                        <img id="invoice_preview" src="" alt="Invoice preview" />
+                        <div class="file-meta" id="invoice_meta">No file selected</div>
+                    </div>
+                </div>
+
+                <div class="upload-item">
+                    <label>LR Image</label>
+                    <input type="file" name="lr_image" accept="image/*">
+                    <div class="preview">
+                        <img id="lr_preview" src="" alt="LR preview" />
+                        <div class="file-meta" id="lr_meta">No file selected</div>
+                    </div>
+                </div>
+
+                <div class="upload-item">
+                    <label>Discrepancy Image</label>
+                    <input type="file" name="discrepancy_image" accept="image/*">
+                    <div class="preview">
+                        <img id="discrepancy_preview" src="" alt="Discrepancy preview" />
+                        <div class="file-meta" id="discrepancy_meta">No file selected</div>
+                    </div>
+                </div>
+
+                <div class="button-row">
+                    <button class="btn" type="submit">Submit Discrepancy</button>
+                    <button class="btn secondary" type="reset">Reset</button>
+                </div>
+
+
+            </div>
+        </div>
+            </form>
+    </div>
+</div>
+</body>
+</html>
+

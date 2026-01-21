@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Submission Successful - RANE MADRAS LIMITED Discrepancy Portal</title> 
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <link rel="icon" href="{{ url_for('static', filename='favicon.svg') }}" type="image/svg+xml">
+</head>
+<body>
+<header class="site-header">
+    <div class="container header-row header-bar">
+        <div class="header-left">
+            <a class="btn secondary" href="{{ url_for('home') }}">Home</a>
+        </div>
+        <div class="header-center">
+            <div class="brand">
+                <img src="{{ url_for('static', filename='logo.svg') }}" alt="RANE MADRAS LIMITED" class="brand-logo" onerror="this.style.display='none'">
+                <div class="brand-text">
+                    <h1>RANE MADRAS LIMITED</h1>
+                    <p>Submission Complete</p>
+                </div>
+            </div>
+        </div>
+        <div class="header-right">
+            {% if sr_no %}<div class="sr-badge">SR No: {{ sr_no }}</div>{% endif %}
+            <a class="btn" href="{{ url_for('admin') }}">Admin</a>
+        </div>
+    </div>
+</header> 
+
+<div class="container">
+    <div class="success-msg">Submitted Successfully</div> 
+
+    <div style="margin-top:14px">
+        {% if ref_no %}<div><strong>Reference No:</strong> {{ ref_no }}</div>{% endif %}
+        {% if subject %}<div><strong>Subject:</strong> {{ subject }}</div>{% endif %}
+        {% if invoice_no %}<div><strong>Invoice No:</strong> {{ invoice_no }}</div>{% endif %}
+        {% if submitted_at %}<div><strong>Submitted at:</strong> {{ submitted_at }}</div>{% endif %}
+
+        {% if invoice_img %}
+            <div><strong>Invoice Image:</strong> <a href="{{ url_for('uploaded_file', folder='invoice', filename=invoice_img) }}">{{ invoice_img }}</a></div>
+        {% endif %}
+        {% if lr_img %}
+            <div><strong>LR Image:</strong> <a href="{{ url_for('uploaded_file', folder='lr', filename=lr_img) }}">{{ lr_img }}</a></div>
+        {% endif %}
+        {% if dis_img %}
+            <div><strong>Discrepancy Image:</strong> <a href="{{ url_for('uploaded_file', folder='discrepancy', filename=dis_img) }}">{{ dis_img }}</a></div>
+        {% endif %}
+    </div>
+
+    <div class="button-row" style="margin-top:18px">
+        <a class="btn" href="{{ url_for('form') }}">Submit Another</a>
+        <a class="btn" href="{{ url_for('admin_view', sr_no=sr_no) }}">View Record</a>
+        {% if ref_no %}<a class="btn" href="{{ url_for('track_direct', ref_no=ref_no) }}">Track</a>{% endif %} 
+        <a class="btn secondary" href="/">Go to Home</a>
+    </div>
+</div>
+</body>
+</html>

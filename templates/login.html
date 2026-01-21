@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Admin Login - RANE MADRAS LIMITED Discrepancy Portal</title> 
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+  <link rel="icon" href="{{ url_for('static', filename='favicon.svg') }}" type="image/svg+xml">
+  <style>.login-card{max-width:420px;margin:40px auto;padding:22px;border-radius:12px;background:#fff;border:1px solid #eef6ff;text-align:center}.login-card h2{margin:0 0 10px}.form-row{display:flex;flex-direction:column;gap:8px;margin-top:12px}input{padding:10px;border-radius:8px;border:1px solid #dbe6f3;width:100%}.msg{color:#d03b3b}</style>
+</head>
+<body>
+<header class="site-header">
+    <div class="container header-row header-bar">
+        <div class="header-left">
+            <a class="btn secondary" href="{{ url_for('home') }}">Home</a>
+        </div>
+        <div class="header-center">
+            <div class="brand">
+                <img src="{{ url_for('static', filename='logo.svg') }}" alt="RANE MADRAS LIMITED" class="brand-logo" onerror="this.style.display='none'">
+                <div class="brand-text">
+                    <h1>RANE MADRAS LIMITED</h1>
+                    <p>Admin Login</p>
+                </div>
+            </div>
+        </div>
+        <div class="header-right">
+            <div class="sr-badge">Admin</div>
+        </div>
+    </div>
+</header> 
+
+<div class="container">
+  <div class="login-card">
+    <h2>Welcome Admin</h2>
+    {% with messages = get_flashed_messages(category_filter=['error']) %}
+      {% if messages %}
+        <div class="msg">{{ messages[0] }}</div>
+      {% endif %}
+    {% endwith %}
+
+    <form method="POST">
+      <div class="form-row">
+        <input name="username" placeholder="Username" required>
+        <input name="password" placeholder="Password" type="password" required>
+      </div>
+      <div style="margin-top:12px">
+        <button class="btn" type="submit">Sign in</button>
+        <a class="btn secondary" href="/">Back</a>
+      </div>
+    </form>
+  </div>
+</div>
+</body>
+</html>

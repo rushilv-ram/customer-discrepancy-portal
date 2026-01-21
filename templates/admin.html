@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Admin Dashboard - RANE MADRAS LIMITED Discrepancy Portal</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}"> 
+  <link rel="icon" href="{{ url_for('static', filename='favicon.svg') }}" type="image/svg+xml"> 
+</head>
+<body>
+<header class="site-header">
+    <div class="container header-row header-bar">
+        <div class="header-left">
+            <a class="btn secondary" href="{{ url_for('home') }}">Home</a>
+        </div>
+        <div class="header-center">
+            <div class="brand">
+                <img src="{{ url_for('static', filename='logo.svg') }}" alt="RANE MADRAS LIMITED" class="brand-logo" onerror="this.style.display='none'">
+                <div class="brand-text">
+                    <h1>RANE MADRAS LIMITED</h1>
+                    <p>Admin Dashboard</p>
+                </div>
+            </div>
+        </div>
+        <div class="header-right">
+            <a class="btn secondary" href="{{ url_for('dashboard') }}">Dashboard</a>
+            <div class="sr-badge">Admin</div>
+        </div>
+    </div>
+</header> 
+<div class="container">
+  <div class="admin-controls">
+    <div class="left">
+      <div class="stats"><strong>Total Records:</strong> {{ total }}</div>
+    </div>
+    <div class="right">
+      <form method="GET" class="filters">
+        <input class="search-input" name="q" value="{{ q }}" placeholder="Search SR / Ref / Invoice / Subject">
+        <input type="date" name="date_from" value="{{ date_from }}">
+        <input type="date" name="date_to" value="{{ date_to }}">
+        <select name="warehouse">
+          <option value="">All Warehouses</option>
+          {% for w in warehouses_all %}
+            <option value="{{ w }}" {% if warehouse_filter==w %}selected{% endif %}>{{ w }}</option>
+          {% endfor %}
+        </select>
+        <select name="part_no">
+          <option value="">All Part Nos</option>
+          {% for p in parts_all %}
+            <option value="{{ p }}" {% if part_filter==p %}selected{% endif %}>{{ p }}</option>
+          {% endfor %}
+        </select>
+        <select name="per_page">
+          <option value="10" {% if per_page==10 %}selected{% endif %}>10</option>
+          <option value="25" {% if per_page==25 %}selected{% endif %}>25</option>
+          <option value="50" {% if per_page==50 %}selected{% endif %}>50</option>
+        </select>
+        <button class="btn" type="submit">Apply</button>
+        <a class="btn secondary" href="{{ url_for('admin') }}">Clear</a>
+        <a class="btn" href="{{ url_for('download_csv', q=q, date_from=date_from, date_to=date_to, warehouse=warehouse_filter, part_no=part_filter) }}">Download CSV</a>
+        <a class="btn secondary" href="{{ url_for('logout') }}">Logout</a> 
+      </form>
+    </div>
+  </div>
+
+  <div class="table-wrap admin-table">
+    <table>
+      <thead>
+        <tr>
+          <th>SR No</th>
+          <th>Ref No</th>
+          <th>Invoices</th>
+          <th>Subject</th>
+          <th>Customer</th>
+          <th>Submitted At</th>
+          <th>Status</th>
+          <th>Images</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for g in groups %}
+        <tr class="group-row">
+          <td>{{ g.sr_no }}</td>
+          <td>{{ g.ref_no or '-' }}</td>
+          <td>
+            <div><strong>{{ g.invoices|length }}</strong> invoice{{ '' if g.invoices|length==1 else 's' }}</div>
+            <div class="muted small">{{ g.invoices[0]['Invoice No'] }}{% if g.invoices|length>1 %} + {{ g.invoices|length-1 }} more{% endif %}</div>
+          </td>
+          <td>{{ g.subject }}</td>
+          <td>{{ g.customer }}</td>
+          <td>{{ g.submitted_at }}</td>
+          <td>
+            {% if g.status %}
+              <span class="status-badge status-{{ g.status|replace(' ','-')|lower() }}">{{ g.status }}</span>
+            {% else %}
+              <span class="status-badge status-open">Open</span>
+            {% endif %}
+          </td>
+          <td class="small">
+            {% if g.invoices[0]['Invoice Image'] %}<div>Inv: <a href="{{ url_for('uploaded_file', folder='invoice', filename=g.invoices[0]['Invoice Image']) }}">view</a></div>{% endif %}
+            {% if g.lr_image %}<div>LR: <a href="{{ url_for('uploaded_file', folder='lr', filename=g.lr_image) }}">view</a></div>{% endif %}
+            {% if g.discrepancy_image %}<div>Dis: <a href="{{ url_for('uploaded_file', folder='discrepancy', filename=g.discrepancy_image) }}">view</a></div>{% endif %}
+          </td>
+          <td class="actions">
+            <a class="btn small" href="{{ url_for('admin_view', sr_no=g.sr_no|int) }}">View</a>
+            <button type="button" class="btn secondary small toggle-invoices" data-sr="{{ g.sr_no }}">Toggle</button>
+          </td>
+        </tr>
+        <tr class="group-details" data-sr="{{ g.sr_no }}" style="display:none">
+          <td colspan="9">
+            <table style="width:100%;border-collapse:collapse;background:#fbfbfe;margin:8px;border-radius:6px;overflow:hidden">
+              <thead>
+                <tr>
+                  <th>Invoice No</th>
+                  <th>Invoice Date</th>
+                  <th>Part No</th>
+                  <th>Billed</th>
+                  <th>Received</th>
+                  <th>Short</th>
+                  <th>Excess</th>
+                  <th>Damage</th>
+                  <th>Invoice Image</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for r in g.invoices %}
+                <tr>
+                  <td>{{ r['Invoice No'] }}</td>
+                  <td>{{ r['Invoice Date'] }}</td>
+                  <td>{{ r['Part No'] }}</td>
+                  <td>{{ r['Billed Qty'] }}</td>
+                  <td>{{ r['Received Qty'] }}</td>
+                  <td>{{ r['Short'] }}</td>
+                  <td>{{ r['Excess'] }}</td>
+                  <td>{{ r['Damage'] }}</td>
+                  <td>{% if r['Invoice Image'] %}<a href="{{ url_for('uploaded_file', folder='invoice', filename=r['Invoice Image']) }}">view</a>{% endif %}</td>
+                  <td>{{ r['Status'] or 'Open' }}</td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', ()=>{
+      document.querySelectorAll('.toggle-invoices').forEach(btn=>{
+        btn.addEventListener('click', ()=>{
+          const sr = btn.getAttribute('data-sr');
+          const detail = document.querySelector(`.group-details[data-sr="${sr}"]`);
+          if(detail) detail.style.display = (detail.style.display === 'none') ? 'table-row' : 'none';
+        });
+      });
+    });
+  </script>
+
+  <div class="pagination">
+    <div class="pages">
+      {% if page>1 %}<a class="btn secondary" href="?q={{ q }}&date_from={{ date_from }}&date_to={{ date_to }}&warehouse={{ warehouse_filter }}&per_page={{ per_page }}&page={{ page-1 }}">Prev</a>{% endif %}
+      <span>Page {{ page }} of {{ pages }}</span>
+      {% if page<pages %}<a class="btn" href="?q={{ q }}&date_from={{ date_from }}&date_to={{ date_to }}&warehouse={{ warehouse_filter }}&per_page={{ per_page }}&page={{ page+1 }}">Next</a>{% endif %}
+    </div>
+  </div>
+
+</div>
+</body>
+</html>
